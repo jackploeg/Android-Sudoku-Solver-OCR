@@ -157,6 +157,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
             return mRGBA
         } else if (STATUS == STATUS_PROCESS_IMAGE) {
             // If the camera button was pressed prepare the image for processing
+            mRGBA = inputFrame!!.rgba()
 
             // Step 1: Get the bounding rectangle's corner points
             val cntPts = OpenCV.getSudokuBoundingRectangle(mRGBA, false)
@@ -178,8 +179,14 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
                 mRGBA = OpenCV.getCroppedSudokuBoard(mRGBA, sortedPoints)
 
                 // Step 4: Convert the resulting Mat to an InputImage
-                val bitmap = SudokuUtils.matToBitmap(mRGBA)
-                val image = InputImage.fromBitmap(bitmap, 0)
+                val bitmapOrig = SudokuUtils.matToBitmap(mRGBA)
+
+                val height = bitmapOrig.height
+                val width = bitmapOrig.width
+                val scale = width.toDouble()/height.toDouble()
+                val bitmap = Bitmap.createScaledBitmap(bitmapOrig, width, (height * scale).toInt(), false)
+
+                var image = InputImage.fromBitmap(bitmap, 0)
 
                 // Save the bitmap file to access it in the SolverActivity
                 val fileOutputStream = baseContext.openFileOutput("tmpBitmap", Context.MODE_PRIVATE)

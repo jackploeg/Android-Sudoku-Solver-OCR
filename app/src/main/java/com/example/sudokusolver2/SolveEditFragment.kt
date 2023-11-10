@@ -54,6 +54,9 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
                 sbv.setSudokuBoard(sudokuBoard)
 
                 it.setBackgroundResource(R.drawable.baseline_edit_24)
+
+                (activity as SolverActivity).changeActiveFragment(SolveImageFragment("tmpBitmap", sudokuBoard))
+
             }
         }
 

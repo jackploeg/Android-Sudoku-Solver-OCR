@@ -70,7 +70,7 @@ class SolverActivity : AppCompatActivity() {
         findViewById<T>(id).setOnClickListener(listener)
     }
 
-    private fun changeActiveFragment(fragment: Fragment) {
+    fun changeActiveFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment)
             .commit()
     }

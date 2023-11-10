@@ -53,7 +53,7 @@ object OpenCV {
             if (approx.toList().size == 4) {
 
                 if (drawContour) {
-                    Imgproc.drawContours(image, contours, cntIndex, Scalar(0.0, 255.0, 0.0), 2)
+                    Imgproc.drawContours(image, contours, cntIndex, Scalar(0.0, 255.0, 0.0), 5)
                 }
 
                 return approx
@@ -152,18 +152,22 @@ object OpenCV {
 
         for (i in 0 until 9) {
             for (j in 0 until 9) {
-                if (solution[i][j].type == SudokuUtils.SUDOKU_CELL_TYPE_SOLUTION) {
+                //if (solution[i][j].type == SudokuUtils.SUDOKU_CELL_TYPE_GIVEN) {
                     Imgproc.putText(
                         image,
                         solution[i][j].number.toString(),
-                        Point(j * d + d / 2 - 30, (i + 1) * d - d / 2 + 40),
+                        Point(j * d + d / 2 - 20, (i + 1) * d - d / 2 + 24),
                         Imgproc.FONT_HERSHEY_COMPLEX,
-                        3.5,
-                        Scalar(255.0, 0.0, 0.0),
-                        5,
+                        2.0,
+                        when (solution[i][j].type) {
+                            SudokuUtils.SUDOKU_CELL_TYPE_GIVEN -> Scalar(255.0, 32.0, 32.0, 255.0)
+                            SudokuUtils.SUDOKU_CELL_TYPE_SOLUTION -> Scalar(32.0, 255.0, 32.0, 255.0)
+                            else -> Scalar(20.0, 32.0, 20.0, 128.0)
+                        },
+                        3,
                         Imgproc.LINE_AA
                     )
-                }
+                //}
             }
         }
     }

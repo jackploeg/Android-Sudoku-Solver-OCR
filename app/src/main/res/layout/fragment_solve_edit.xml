@@ -34,6 +34,7 @@
             android:layout_height="50dp"
             android:background="@drawable/roundbutton"
             android:onClick="numberBtnClick"
+            android:textColor="@color/white"
             android:text="1" />
 
         <Button
@@ -43,6 +44,7 @@
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@+id/b1"
             android:background="@drawable/roundbutton"
+            android:textColor="@color/white"
             android:text="2" />
 
         <Button
@@ -52,6 +54,7 @@
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@id/b2"
             android:background="@drawable/roundbutton"
+            android:textColor="@color/white"
             android:text="3" />
 
         <Button
@@ -61,6 +64,7 @@
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@id/b3"
             android:background="@drawable/roundbutton"
+            android:textColor="@color/white"
             android:text="4" />
 
         <Button
@@ -70,6 +74,7 @@
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@id/b4"
             android:background="@drawable/roundbutton"
+            android:textColor="@color/white"
             android:text="5" />
 
         <Button
@@ -79,6 +84,7 @@
             android:layout_below="@id/b1"
             android:layout_marginTop="8dp"
             android:background="@drawable/roundbutton"
+            android:textColor="@color/white"
             android:text="6" />
 
         <Button
@@ -90,6 +96,7 @@
             android:layout_marginTop="8dp"
             android:layout_toEndOf="@id/b6"
             android:background="@drawable/roundbutton"
+            android:textColor="@color/white"
             android:text="7" />
 
         <Button
@@ -102,6 +109,7 @@
             android:layout_toEndOf="@id/b7"
 
             android:background="@drawable/roundbutton"
+            android:textColor="@color/white"
             android:text="8" />
 
         <Button
@@ -113,6 +121,7 @@
             android:layout_marginTop="8dp"
             android:layout_toEndOf="@id/b8"
             android:background="@drawable/roundbutton"
+            android:textColor="@color/white"
             android:text="9" />
 
         <Button
@@ -124,6 +133,7 @@
             android:layout_marginTop="8dp"
             android:layout_toEndOf="@id/b9"
             android:background="@drawable/roundbutton"
+            android:textColor="@color/white"
             android:text="X" />
 
     </RelativeLayout>

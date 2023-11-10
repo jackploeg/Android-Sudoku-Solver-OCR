@@ -30,24 +30,36 @@ object OCR {
 
         // Loop trough all blocks, lines and text elements and calculate their corresponding position indexes
         // in the 2d array using the element's bounding box center coordinates on the original image
+
         for (block in result.textBlocks) {
-            for (line in block.lines) {
+            for ((index, line) in block.lines.withIndex()) {
                 for (element in line.elements) {
 
                     val rect = element.boundingBox
-                    val j = rect!!.centerX() / cWidth
-                    val i = rect!!.centerY() / cHeight
+//                    val j = rect!!.centerX() / cWidth
+//                    val i = rect!!.centerY() / cHeight
+//
+//                    sudokuBoard[i][j].let {
+//                        it.number = element.text.toInt()
+//                        it.type = SudokuUtils.SUDOKU_CELL_TYPE_GIVEN
+//                    }
+                    val leftCell = (rect!!.left +10) / cWidth
+                    val row = ((rect!!.top + 10) / cHeight)
 
-                    sudokuBoard[i][j].let {
-                        it.number = element.text.toInt()
-                        it.type = SudokuUtils.SUDOKU_CELL_TYPE_GIVEN
+                    for (i in 0..element.text.length - 1) {
+                        if ( element.text.get(i) in '1' .. '9' ) {
+                            sudokuBoard[row][leftCell + i].let {
+                                it.number = element.text.get(i).toInt() - 48
+                                it.type = SudokuUtils.SUDOKU_CELL_TYPE_GIVEN
+                            }
+                        }
                     }
                 }
             }
         }
-
         return sudokuBoard
     }
+
 
     /**
      * Process the image with MLKit Text Recognition and return the parsed sudoku board as int 2d array

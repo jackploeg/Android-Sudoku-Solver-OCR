@@ -1,6 +1,5 @@
 package com.example.sudokusolver2
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 
