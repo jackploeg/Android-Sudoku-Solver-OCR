@@ -1,4 +1,4 @@
-package com.example.sudokusolver2
+package nl.trisol.sudokusolver
 
 import android.content.Context
 import android.widget.Toast
@@ -28,7 +28,7 @@ class Solver(_context: Context) {
         if(!solve()) {
             Toast.makeText(
                 context,
-                "Unsolvable!",
+                context.getString(R.string.unsolvable),
                 Toast.LENGTH_SHORT
             ).show()
             SudokuUtils.set0(sudokuBoard)

@@ -1,7 +1,7 @@
-package com.example.sudokusolver2.imageproc
+package nl.trisol.sudokusolver.imageproc
 
 import android.util.Log
-import com.example.sudokusolver2.SudokuUtils
+import nl.trisol.sudokusolver.SudokuUtils
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -11,7 +11,7 @@ import java.lang.Exception
 
 object OCR {
 
-    private const val TAG = "SudokuSolver2"
+    private const val TAG = "SudokuSolver"
 
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 

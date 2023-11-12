@@ -1,4 +1,4 @@
-package com.example.sudokusolver2
+package nl.trisol.sudokusolver
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -51,13 +51,13 @@ object SudokuUtils {
     }
 
     fun printSudokuBoard(arr: Array<Array<SudokuCell>>) {
-        Log.d("SudokuSolver2", "Solved")
+        Log.d("SudokuSolver", "Solved")
         for (i in 0 until 9) {
             val array = CharArray(9)
             for (j in 0 until 9) {
                 array[j] = arr[i][j].number.toString()[0]
             }
-            Log.d("SudokuSolver2", array.joinToString(" "))
+            Log.d("SudokuSolver", array.joinToString(" "))
         }
     }
 }

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.sudokusolver2'
+    namespace 'nl.trisol.sudokusolver'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.sudokusolver2"
+        applicationId "nl.trisol.sudokusolver"
         minSdk 26
         targetSdk 33
         versionCode 1

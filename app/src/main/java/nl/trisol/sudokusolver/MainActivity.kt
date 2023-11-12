@@ -1,11 +1,10 @@
-package com.example.sudokusolver2
+package nl.trisol.sudokusolver
 
 import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.hardware.camera2.CameraManager
 import android.os.Bundle
 import android.util.Log
 import android.view.SurfaceView
@@ -13,9 +12,10 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.sudokusolver2.databinding.ActivityMainBinding
-import com.example.sudokusolver2.imageproc.OCR
-import com.example.sudokusolver2.imageproc.OpenCV
+import nl.trisol.sudokusolver.R
+import nl.trisol.sudokusolver.databinding.ActivityMainBinding
+import nl.trisol.sudokusolver.imageproc.OCR
+import nl.trisol.sudokusolver.imageproc.OpenCV
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.runBlocking
 import org.opencv.android.BaseLoaderCallback
@@ -23,7 +23,6 @@ import org.opencv.android.CameraBridgeViewBase
 import org.opencv.android.JavaCameraView
 import org.opencv.android.LoaderCallbackInterface
 import org.opencv.android.OpenCVLoader
-import org.opencv.android.Utils
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 
@@ -31,7 +30,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
 
     companion object {
         private const val CAMERA_PERMISSION_CODE = 101
-        private const val TAG = "SudokuSolver2"
+        private const val TAG = "SudokuSolver"
 
         private const val STATUS_NOTHING = -1
         private const val STATUS_PREVIEWING = 1
@@ -100,7 +99,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
             } else {
                 Toast.makeText(
                     applicationContext,
-                    "Camera permission is required",
+                    getString(R.string.camera_permission_is_required),
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -167,7 +166,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
                 runOnUiThread {
                     Toast.makeText(
                         applicationContext,
-                        "Couldn't detect any sudoku board. Try again!",
+                        getString(R.string.no_board),
                         Toast.LENGTH_SHORT
                     ).show()
                 }

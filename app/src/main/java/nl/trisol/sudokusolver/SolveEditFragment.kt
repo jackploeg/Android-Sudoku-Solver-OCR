@@ -1,4 +1,4 @@
-package com.example.sudokusolver2
+package nl.trisol.sudokusolver
 
 import android.content.Context
 import android.graphics.Canvas
@@ -12,10 +12,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.constraintlayout.widget.ConstraintSet.Motion
-import androidx.constraintlayout.widget.Group
-import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
+import nl.trisol.sudokusolver.R
 import kotlin.math.floor
 import kotlin.math.min
 
@@ -38,6 +36,9 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
         val sbv = view.findViewById<SudokuBoardView>(R.id.sudokuBoard)
         sbv.setSudokuBoard(sudokuBoard)
 
+        // TODO alleen done icon tonen als de sudoku oplosbaar is
+        (activity as SolverActivity).findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_done_24)
+
         (activity as SolverActivity).bindListenerToView<Button>(R.id.editBtn) {
             EDIT = !EDIT
             if(EDIT) {
@@ -50,6 +51,7 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
             } else {
                 sbv.isEditingMode(false)
 
+                SudokuUtils.set0(sudokuBoard)
                 Solver.getInstance().solveSudoku(sudokuBoard)
                 sbv.setSudokuBoard(sudokuBoard)
 
@@ -114,7 +116,8 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
 
         init {
             textPaint.color = Color.WHITE
-            val attrs = context.theme.obtainStyledAttributes(attributeSet, R.styleable.SudokuBoardView, 0, 0)
+            val attrs = context.theme.obtainStyledAttributes(attributeSet,
+                R.styleable.SudokuBoardView, 0, 0)
             try {
                 thinColor = attrs.getInteger(R.styleable.SudokuBoardView_thinColor, 0)
                 thickColor = attrs.getInteger(R.styleable.SudokuBoardView_thickColor, 0)
@@ -196,6 +199,7 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
             boardPaint.color = thinColor
             textPaint.textSize = 60.0F
 
+            // TODO checken of de sudoku oplosbaar is, zo niet: geem done icon tonen
             for(i in 0..8) {
                 for(j in 0..8) {
                     if(sudokuBoard[i][j].number != 0) {

@@ -1,21 +1,22 @@
-package com.example.sudokusolver2
+package nl.trisol.sudokusolver
 
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
-import com.example.sudokusolver2.imageproc.OpenCV
-import org.opencv.android.Utils
-import org.opencv.core.Mat
+import nl.trisol.sudokusolver.R
+import nl.trisol.sudokusolver.imageproc.OpenCV
 
 class SolveImageFragment(_fileName: String, _sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fragment() {
 
     private val fileName = _fileName
     private val sudokuBoard = _sudokuBoard
+    private var EDIT = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,12 +33,21 @@ class SolveImageFragment(_fileName: String, _sudokuBoard: Array<Array<SudokuUtil
         val file = context?.getFileStreamPath(fileName)
         var bitmap = BitmapFactory.decodeFile(file?.path)
 
+        // TODO alleen bitmap laden als er iets zinvols is gescand, anders default sudoku image
         val mat = SudokuUtils.bitmapToMat(bitmap)
         OpenCV.overlaySolutionOnImage(mat, sudokuBoard)
 
         bitmap = SudokuUtils.matToBitmap(mat)
 
         view.findViewById<ImageView>(R.id.image_view).setImageBitmap(bitmap)
+
+        (activity as SolverActivity).findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_edit_24)
+        (activity as SolverActivity).bindListenerToView<Button>(R.id.editBtn) {
+            //EDIT = !EDIT
+            //if(EDIT) {
+                (activity as SolverActivity).changeActiveFragment(SolveEditFragment(sudokuBoard))
+            //}
+        }
 
         return view
     }

@@ -1,7 +1,6 @@
-package com.example.sudokusolver2.imageproc
+package nl.trisol.sudokusolver.imageproc
 
-import android.provider.ContactsContract.CommonDataKinds.Im
-import com.example.sudokusolver2.SudokuUtils
+import nl.trisol.sudokusolver.SudokuUtils
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
@@ -152,21 +151,31 @@ object OpenCV {
 
         for (i in 0 until 9) {
             for (j in 0 until 9) {
-                //if (solution[i][j].type == SudokuUtils.SUDOKU_CELL_TYPE_GIVEN) {
-                    Imgproc.putText(
-                        image,
-                        solution[i][j].number.toString(),
-                        Point(j * d + d / 2 - 20, (i + 1) * d - d / 2 + 24),
-                        Imgproc.FONT_HERSHEY_COMPLEX,
-                        2.0,
-                        when (solution[i][j].type) {
-                            SudokuUtils.SUDOKU_CELL_TYPE_GIVEN -> Scalar(255.0, 32.0, 32.0, 255.0)
-                            SudokuUtils.SUDOKU_CELL_TYPE_SOLUTION -> Scalar(32.0, 255.0, 32.0, 255.0)
-                            else -> Scalar(20.0, 32.0, 20.0, 128.0)
-                        },
-                        3,
-                        Imgproc.LINE_AA
-                    )
+                // shadow
+                Imgproc.putText(
+                    image,
+                    solution[i][j].number.toString(),
+                    Point(j * d + d / 2 - 17, (i + 1) * d - d / 2 + 27),
+                    Imgproc.FONT_HERSHEY_COMPLEX,
+                    2.0,
+                    Scalar(0.0, 0.0, 0.0, 255.0),
+                    3,
+                    Imgproc.LINE_AA
+                )
+                Imgproc.putText(
+                    image,
+                    solution[i][j].number.toString(),
+                    Point(j * d + d / 2 - 20, (i + 1) * d - d / 2 + 24),
+                    Imgproc.FONT_HERSHEY_COMPLEX,
+                    2.0,
+                    when (solution[i][j].type) {
+                        SudokuUtils.SUDOKU_CELL_TYPE_GIVEN -> Scalar(255.0, 32.0, 32.0, 255.0)
+                        SudokuUtils.SUDOKU_CELL_TYPE_SOLUTION -> Scalar(32.0, 255.0, 32.0, 255.0)
+                        else -> Scalar(20.0, 32.0, 20.0, 128.0)
+                    },
+                    3,
+                    Imgproc.LINE_AA
+                )
                 //}
             }
         }

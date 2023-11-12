@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SudokuSolver</string>
+    <string name="unsolvable">Sudoku is niet oplosbaar</string>
+    <string name="camera_permission_is_required">Toestemming voor camera-gebruik nodig</string>
+    <string name="no_board">Geen Sudoku gevonden, probeer het nog eens.</string>
+</resources>

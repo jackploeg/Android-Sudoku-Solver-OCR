@@ -1,19 +1,18 @@
-package com.example.sudokusolver2
+package nl.trisol.sudokusolver
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import org.opencv.features2d.BOWTrainer
+import nl.trisol.sudokusolver.R
 
 class SolverActivity : AppCompatActivity() {
 
     companion object {
-        private const val TAG = "SudokuSolver2"
+        private const val TAG = "SudokuSolver"
 
         private const val STATE_IMAGE = 0
         private const val STATE_EDIT = 1
@@ -21,7 +20,8 @@ class SolverActivity : AppCompatActivity() {
 
     private lateinit var sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>
 
-    private var STATE = STATE_IMAGE
+    private var STATE = STATE_EDIT
+    private var solvable = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +34,9 @@ class SolverActivity : AppCompatActivity() {
                 else
                     intent.getSerializableExtra("sudokuBoard") as Array<Array<SudokuUtils.SudokuCell>>
 
-            Solver.getInstance().solveSudoku(sudokuBoard)
-            changeActiveFragment(SolveImageFragment("tmpBitmap", sudokuBoard))
+            solvable = Solver.getInstance().solveSudoku(sudokuBoard)
+            changeActiveFragment(SolveEditFragment(sudokuBoard))
+            findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_done_24)
 
         } else {
             sudokuBoard = SudokuUtils.emptySudoku2DArray()
@@ -50,16 +51,21 @@ class SolverActivity : AppCompatActivity() {
             finish()
         }
 
-        findViewById<Button>(R.id.editBtn).setOnClickListener {
-            if(STATE == STATE_IMAGE) {
-                STATE = STATE_EDIT
-
-                SudokuUtils.set0(sudokuBoard)
-                changeActiveFragment(SolveEditFragment(sudokuBoard))
-
-                findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_done_24)
-            }
-        }
+//        findViewById<Button>(R.id.editBtn).setOnClickListener {
+//            if(STATE == STATE_IMAGE) {
+//                STATE = STATE_EDIT
+//
+//                SudokuUtils.set0(sudokuBoard)
+//                changeActiveFragment(SolveEditFragment(sudokuBoard))
+//
+//                findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_done_24)
+//            } else {
+//                STATE = STATE_IMAGE
+//                changeActiveFragment(SolveImageFragment("tmpBitmap", sudokuBoard))
+//                findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_edit_24)
+//
+//            }
+//        }
     }
 
     /**

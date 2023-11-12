@@ -12,6 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "SudokuSolver2"
+rootProject.name = "SudokuSolver"
 include ':app'
 include ':opencv'

@@ -1,4 +1,4 @@
-package com.example.sudokusolver2
+package nl.trisol.sudokusolver
 
 import org.junit.Test
 
