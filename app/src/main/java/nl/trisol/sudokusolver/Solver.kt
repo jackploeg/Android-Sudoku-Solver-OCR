@@ -25,7 +25,7 @@ class Solver(_context: Context) {
 
 
         // If solve() returns false then there is no solution for the puzzle
-        if(!solve()) {
+        if(!solveUp()) {
             Toast.makeText(
                 context,
                 context.getString(R.string.unsolvable),
@@ -61,13 +61,48 @@ class Solver(_context: Context) {
         return true
     }
 
+    fun isValidStartGrid(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>): Boolean {
+        sudokuBoard = _sudokuBoard
+        for (row in 0 .. 8) {
+            for (col in 0..8) {
+                val entry = sudokuBoard[row][col].number
+                if (entry > 0) {
+                    // Check on row and column
+                    for (i in 0 until 9) {
+                        if (i != col && sudokuBoard[row][i].number == entry)
+                            return false
+                        if (i != row && sudokuBoard[i][col].number == entry)
+                            return false
+                    }
+
+                    // Check in the 3x3 subgrid
+                    // Get the top left row and column indexes of the subgrid and iterate the subgrid
+                    val subgridTLi = row / 3
+                    val subgridTlj = col / 3
+                    for (i in subgridTLi * 3 until subgridTLi * 3 + 3) {
+                        for (j in subgridTlj * 3 until subgridTlj * 3 + 3) {
+                            if (sudokuBoard[i][j].number == entry && i != row && j != col)
+                                return false
+                        }
+                    }
+                }
+            }
+        }
+
+        return singleSolution()
+    }
+
+    private fun singleSolution(): Boolean {
+        return solveUp() == solveDown()
+    }
+
     /**
      * Function to solve the sudoku
      *
      * Find all numbers that must be completed and for each one try every number from 1 to 9.
      * If a solution is valid place the number and try solving further, otherwise try another solution
      */
-    private fun solve(index: Int = 0): Boolean {
+    private fun solveUp(index: Int = 0): Boolean {
         for (i in index until 81) {
             val r = i / 9
             val c = i % 9
@@ -75,7 +110,27 @@ class Solver(_context: Context) {
                 for (n in 1..9) {
                     if (isValidSolution(r, c, n)) {
                         sudokuBoard[r][c].number = n
-                        if (solve(i + 1)) {
+                        if (solveUp(i + 1)) {
+                            return true
+                        }
+                        sudokuBoard[r][c].number = 0
+                    }
+                }
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun solveDown(index: Int = 9): Boolean {
+        for (i in 80 downTo index) {
+            val r = i / 9
+            val c = i % 9
+            if (sudokuBoard[r][c].number == 0) {
+                for (n in 1..9) {
+                    if (isValidSolution(r, c, n)) {
+                        sudokuBoard[r][c].number = n
+                        if (solveDown(i - 1)) {
                             return true
                         }
                         sudokuBoard[r][c].number = 0

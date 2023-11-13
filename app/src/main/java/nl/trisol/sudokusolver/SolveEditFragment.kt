@@ -12,6 +12,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import nl.trisol.sudokusolver.R
 import kotlin.math.floor
@@ -23,10 +24,6 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
 
     private var EDIT = true
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,6 +34,8 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
         sbv.setSudokuBoard(sudokuBoard)
 
         // TODO alleen done icon tonen als de sudoku oplosbaar is
+        // sowieso > 16 cijfers voorgevuld
+
         (activity as SolverActivity).findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_done_24)
 
         (activity as SolverActivity).bindListenerToView<Button>(R.id.editBtn) {
@@ -49,16 +48,29 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
 
                 it.setBackgroundResource(R.drawable.baseline_done_24)
             } else {
-                sbv.isEditingMode(false)
+                if (Solver.getInstance().isValidStartGrid(sudokuBoard)) {
+                    sbv.isEditingMode(false)
 
-                SudokuUtils.set0(sudokuBoard)
-                Solver.getInstance().solveSudoku(sudokuBoard)
-                sbv.setSudokuBoard(sudokuBoard)
+                    SudokuUtils.set0(sudokuBoard)
+                    Solver.getInstance().solveSudoku(sudokuBoard)
+                    sbv.setSudokuBoard(sudokuBoard)
 
-                it.setBackgroundResource(R.drawable.baseline_edit_24)
+                    it.setBackgroundResource(R.drawable.baseline_edit_24)
 
-                (activity as SolverActivity).changeActiveFragment(SolveImageFragment("tmpBitmap", sudokuBoard))
+                    (activity as SolverActivity).changeActiveFragment(
+                        SolveImageFragment(
+                            "tmpBitmap",
+                            sudokuBoard
+                        )
+                    )
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Not solvable...",
+                        Toast.LENGTH_LONG
+                    ).show()
 
+                }
             }
         }
 
@@ -109,6 +121,8 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
 
         var SELECTED_ROW = -1
         var SELECTED_COLUMN = -1
+
+        private val context = context
 
         private var editing = true
 
@@ -200,6 +214,7 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
             textPaint.textSize = 60.0F
 
             // TODO checken of de sudoku oplosbaar is, zo niet: geem done icon tonen
+            var filledCellsCount = 0
             for(i in 0..8) {
                 for(j in 0..8) {
                     if(sudokuBoard[i][j].number != 0) {
@@ -207,6 +222,7 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
 
                         // Highlight the numbers detected from the sudoku
                         if(sudokuBoard[i][j].type == SudokuUtils.SUDOKU_CELL_TYPE_GIVEN && (j != SELECTED_COLUMN || i != SELECTED_ROW)) {
+                            filledCellsCount++
                             canvas.drawCircle(j * cellsize + cellsize / 2, i * cellsize + cellsize / 2, 50F, boardPaint)
                         }
 
@@ -218,6 +234,13 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
                         canvas.drawText(text, (j * cellsize) + ((cellsize - w) / 2), (i * cellsize + cellsize) - ((cellsize - h) / 2), textPaint)
                     }
                 }
+            }
+            if (filledCellsCount > 16) {
+                Toast.makeText(
+                    context,
+                    "May be solvable...",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
 
