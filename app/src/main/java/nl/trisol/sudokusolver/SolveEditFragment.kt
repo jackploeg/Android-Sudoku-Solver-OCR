@@ -14,7 +14,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import nl.trisol.sudokusolver.R
 import kotlin.math.floor
 import kotlin.math.min
 
@@ -36,26 +35,28 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
         // TODO alleen done icon tonen als de sudoku oplosbaar is
         // sowieso > 16 cijfers voorgevuld
 
-        (activity as SolverActivity).findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_done_24)
+        (activity as SolverActivity).findViewById<Button>(R.id.editBtn)
+            .setBackgroundResource(R.drawable.baseline_done_24)
 
-        (activity as SolverActivity).bindListenerToView<Button>(R.id.editBtn) {
+        (activity as SolverActivity).bindListenerToView<Button>(R.id.editBtn) { button ->
             EDIT = !EDIT
-            if(EDIT) {
+            if (EDIT) {
                 sbv.isEditingMode(true)
 
                 SudokuUtils.set0(sudokuBoard)
                 sbv.setSudokuBoard(sudokuBoard)
 
-                it.setBackgroundResource(R.drawable.baseline_done_24)
+                button.setBackgroundResource(R.drawable.baseline_done_24)
             } else {
-                if (Solver.getInstance().isValidStartGrid(sudokuBoard)) {
+                runCatching {
+                    Solver.getInstance().checkStartGridValidity(sudokuBoard)
                     sbv.isEditingMode(false)
 
                     SudokuUtils.set0(sudokuBoard)
                     Solver.getInstance().solveSudoku(sudokuBoard)
                     sbv.setSudokuBoard(sudokuBoard)
 
-                    it.setBackgroundResource(R.drawable.baseline_edit_24)
+                    button.setBackgroundResource(R.drawable.baseline_edit_24)
 
                     (activity as SolverActivity).changeActiveFragment(
                         SolveImageFragment(
@@ -63,22 +64,24 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
                             sudokuBoard
                         )
                     )
-                } else {
+                }.recover {
+                    // {
                     Toast.makeText(
                         context,
-                        "Not solvable...",
+                        it.message,
                         Toast.LENGTH_LONG
                     ).show()
-
                 }
             }
         }
 
+
         // Add listeners to all 1..9 buttons
-        for(i in 1..9) {
-            val id = resources.getIdentifier("b${i}", "id", (activity as SolverActivity).packageName)
+        for (i in 1..9) {
+            val id =
+                resources.getIdentifier("b${i}", "id", (activity as SolverActivity).packageName)
             view.findViewById<Button>(id).setOnClickListener {
-                if(sbv.SELECTED_ROW != -1 && sbv.SELECTED_COLUMN != -1) {
+                if (sbv.SELECTED_ROW != -1 && sbv.SELECTED_COLUMN != -1) {
                     sudokuBoard[sbv.SELECTED_ROW][sbv.SELECTED_COLUMN].let {
                         it.number = i
                         it.type = SudokuUtils.SUDOKU_CELL_TYPE_GIVEN
@@ -92,7 +95,7 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
         }
 
         view.findViewById<Button>(R.id.bX).setOnClickListener {
-            if(sbv.SELECTED_ROW != -1 && sbv.SELECTED_COLUMN != -1) {
+            if (sbv.SELECTED_ROW != -1 && sbv.SELECTED_COLUMN != -1) {
                 sudokuBoard[sbv.SELECTED_ROW][sbv.SELECTED_COLUMN].let {
                     it.number = 0
                     it.type = SudokuUtils.SUDOKU_CELL_TYPE_SOLUTION
@@ -107,7 +110,8 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
         return view
     }
 
-    class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
+    class SudokuBoardView(context: Context, attributeSet: AttributeSet) :
+        View(context, attributeSet) {
 
         private val boardPaint = Paint()
         private val textPaint = Paint()
@@ -130,8 +134,10 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
 
         init {
             textPaint.color = Color.WHITE
-            val attrs = context.theme.obtainStyledAttributes(attributeSet,
-                R.styleable.SudokuBoardView, 0, 0)
+            val attrs = context.theme.obtainStyledAttributes(
+                attributeSet,
+                R.styleable.SudokuBoardView, 0, 0
+            )
             try {
                 thinColor = attrs.getInteger(R.styleable.SudokuBoardView_thinColor, 0)
                 thickColor = attrs.getInteger(R.styleable.SudokuBoardView_thickColor, 0)
@@ -145,7 +151,12 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
 
             if (SELECTED_COLUMN != -1 && SELECTED_ROW != -1) {
                 boardPaint.color = thickColor
-                canvas.drawCircle(SELECTED_COLUMN * cellsize + cellsize / 2, SELECTED_ROW * cellsize + cellsize / 2, 50F, boardPaint);
+                canvas.drawCircle(
+                    SELECTED_COLUMN * cellsize + cellsize / 2,
+                    SELECTED_ROW * cellsize + cellsize / 2,
+                    50F,
+                    boardPaint
+                );
             }
 
             drawBoard(canvas)
@@ -166,11 +177,11 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
         }
 
         override fun onTouchEvent(event: MotionEvent?): Boolean {
-            if(editing) {
+            if (editing) {
                 val x = event!!.x
                 val y = event!!.y
 
-                if(event.action == MotionEvent.ACTION_DOWN) {
+                if (event.action == MotionEvent.ACTION_DOWN) {
                     SELECTED_ROW = floor(y / cellsize).toInt()
                     SELECTED_COLUMN = floor(x / cellsize).toInt()
 
@@ -215,15 +226,20 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
 
             // TODO checken of de sudoku oplosbaar is, zo niet: geem done icon tonen
             var filledCellsCount = 0
-            for(i in 0..8) {
-                for(j in 0..8) {
-                    if(sudokuBoard[i][j].number != 0) {
+            for (i in 0..8) {
+                for (j in 0..8) {
+                    if (sudokuBoard[i][j].number != 0) {
                         val text = sudokuBoard[i][j].number.toString()
 
                         // Highlight the numbers detected from the sudoku
-                        if(sudokuBoard[i][j].type == SudokuUtils.SUDOKU_CELL_TYPE_GIVEN && (j != SELECTED_COLUMN || i != SELECTED_ROW)) {
+                        if (sudokuBoard[i][j].type == SudokuUtils.SUDOKU_CELL_TYPE_GIVEN && (j != SELECTED_COLUMN || i != SELECTED_ROW)) {
                             filledCellsCount++
-                            canvas.drawCircle(j * cellsize + cellsize / 2, i * cellsize + cellsize / 2, 50F, boardPaint)
+                            canvas.drawCircle(
+                                j * cellsize + cellsize / 2,
+                                i * cellsize + cellsize / 2,
+                                50F,
+                                boardPaint
+                            )
                         }
 
                         textPaint.getTextBounds(text, 0, text.length, characterPaintRect)
@@ -231,16 +247,14 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
                         val w = textPaint.measureText(text)
                         val h = characterPaintRect.height()
 
-                        canvas.drawText(text, (j * cellsize) + ((cellsize - w) / 2), (i * cellsize + cellsize) - ((cellsize - h) / 2), textPaint)
+                        canvas.drawText(
+                            text,
+                            (j * cellsize) + ((cellsize - w) / 2),
+                            (i * cellsize + cellsize) - ((cellsize - h) / 2),
+                            textPaint
+                        )
                     }
                 }
-            }
-            if (filledCellsCount > 16) {
-                Toast.makeText(
-                    context,
-                    "May be solvable...",
-                    Toast.LENGTH_LONG
-                ).show()
             }
         }
 

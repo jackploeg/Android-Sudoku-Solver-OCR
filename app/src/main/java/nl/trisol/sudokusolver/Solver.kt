@@ -1,6 +1,7 @@
 package nl.trisol.sudokusolver
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 
 class Solver(_context: Context) {
@@ -12,6 +13,7 @@ class Solver(_context: Context) {
     companion object {
 
         private lateinit var instance: Solver
+        private const val TAG = "Solver"
 
         fun init(_context: Context) {
             instance = Solver(_context)
@@ -25,7 +27,7 @@ class Solver(_context: Context) {
 
 
         // If solve() returns false then there is no solution for the puzzle
-        if(!solveUp()) {
+        if(!solveFromLowToHigh()) {
             Toast.makeText(
                 context,
                 context.getString(R.string.unsolvable),
@@ -40,7 +42,7 @@ class Solver(_context: Context) {
     /**
      * Check if we can place a number at the given row and column.
      */
-    private fun isValidSolution(row: Int, col: Int, n: Int): Boolean {
+    private fun numberIsValidForPosition(row: Int, col: Int, n: Int): Boolean {
         // Check on row and column
         for (i in 0 until 9) {
             if (sudokuBoard[row][i].number == n || sudokuBoard[i][col].number == n)
@@ -61,7 +63,7 @@ class Solver(_context: Context) {
         return true
     }
 
-    fun isValidStartGrid(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>): Boolean {
+    fun checkStartGridValidity(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>): Result<Boolean> {
         sudokuBoard = _sudokuBoard
         for (row in 0 .. 8) {
             for (col in 0..8) {
@@ -70,9 +72,9 @@ class Solver(_context: Context) {
                     // Check on row and column
                     for (i in 0 until 9) {
                         if (i != col && sudokuBoard[row][i].number == entry)
-                            return false
+                            return error(context.getString(R.string.duplicate_in_row))
                         if (i != row && sudokuBoard[i][col].number == entry)
-                            return false
+                            return error(context.getString(R.string.duplicate_in_column))
                     }
 
                     // Check in the 3x3 subgrid
@@ -82,7 +84,7 @@ class Solver(_context: Context) {
                     for (i in subgridTLi * 3 until subgridTLi * 3 + 3) {
                         for (j in subgridTlj * 3 until subgridTlj * 3 + 3) {
                             if (sudokuBoard[i][j].number == entry && i != row && j != col)
-                                return false
+                                return error(context.getString(R.string.duplicate_in_square))
                         }
                     }
                 }
@@ -92,8 +94,28 @@ class Solver(_context: Context) {
         return singleSolution()
     }
 
-    private fun singleSolution(): Boolean {
-        return solveUp() == solveDown()
+    private fun singleSolution(): Result<Boolean> {
+        SudokuUtils.set0(sudokuBoard)
+        if (solveFromLowToHigh()) {
+            val sbUp = StringBuilder()
+            sudokuBoard.forEach {row -> row.forEach { cell -> sbUp.append(cell.number)}}
+            val up = sbUp.toString()
+            Log.d(TAG, "singleSolution: $up")
+
+            SudokuUtils.set0(sudokuBoard)
+            solveFromHighToLow()
+            val sbDown = StringBuilder()
+
+            sudokuBoard.forEach {row -> row.forEach { cell -> sbDown.append(cell.number)}}
+            val down = sbDown.toString()
+            Log.d(TAG, "singleSolution: $down")
+            if (up == down) {
+                return Result.success(true)
+            } else {
+                return error(context.getString(R.string.multiple_solutions))
+            }
+        }
+        return error(context.getString(R.string.multiple_solutions))
     }
 
     /**
@@ -102,15 +124,15 @@ class Solver(_context: Context) {
      * Find all numbers that must be completed and for each one try every number from 1 to 9.
      * If a solution is valid place the number and try solving further, otherwise try another solution
      */
-    private fun solveUp(index: Int = 0): Boolean {
+    private fun solveFromLowToHigh(index: Int = 0): Boolean {
         for (i in index until 81) {
             val r = i / 9
             val c = i % 9
             if (sudokuBoard[r][c].number == 0) {
                 for (n in 1..9) {
-                    if (isValidSolution(r, c, n)) {
+                    if (numberIsValidForPosition(r, c, n)) {
                         sudokuBoard[r][c].number = n
-                        if (solveUp(i + 1)) {
+                        if (solveFromLowToHigh(i + 1)) {
                             return true
                         }
                         sudokuBoard[r][c].number = 0
@@ -122,15 +144,15 @@ class Solver(_context: Context) {
         return true
     }
 
-    private fun solveDown(index: Int = 9): Boolean {
-        for (i in 80 downTo index) {
+    private fun solveFromHighToLow(index: Int = 0): Boolean {
+        for (i in index until 81) {
             val r = i / 9
             val c = i % 9
             if (sudokuBoard[r][c].number == 0) {
-                for (n in 1..9) {
-                    if (isValidSolution(r, c, n)) {
+                for (n in 9 downTo 1) {
+                    if (numberIsValidForPosition(r, c, n)) {
                         sudokuBoard[r][c].number = n
-                        if (solveDown(i - 1)) {
+                        if (solveFromLowToHigh(i + 1)) {
                             return true
                         }
                         sudokuBoard[r][c].number = 0

@@ -8,8 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import nl.trisol.sudokusolver.R
 import nl.trisol.sudokusolver.imageproc.OpenCV
+import org.opencv.core.Mat
 
 class SolveImageFragment(_fileName: String, _sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fragment() {
 
@@ -34,7 +37,12 @@ class SolveImageFragment(_fileName: String, _sudokuBoard: Array<Array<SudokuUtil
         var bitmap = BitmapFactory.decodeFile(file?.path)
 
         // TODO alleen bitmap laden als er iets zinvols is gescand, anders default sudoku image
-        val mat = SudokuUtils.bitmapToMat(bitmap)
+        var mat: Mat
+        if (bitmap == null) {
+            mat = SudokuUtils.bitmapToMat(ResourcesCompat.getDrawable(resources, R.drawable.blank, null)?.toBitmap()!!)
+        } else {
+            mat = SudokuUtils.bitmapToMat(bitmap)
+        }
         OpenCV.overlaySolutionOnImage(mat, sudokuBoard)
 
         bitmap = SudokuUtils.matToBitmap(mat)

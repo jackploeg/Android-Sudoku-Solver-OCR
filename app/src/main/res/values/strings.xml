@@ -3,4 +3,8 @@
     <string name="unsolvable">Sudoku is unsolvable</string>
     <string name="camera_permission_is_required">Camera permission is required</string>
     <string name="no_board">Couldn\'t detect any sudoku board, try again.</string>
+    <string name="multiple_solutions">There are multiple solutions.</string>
+    <string name="duplicate_in_square">Duplicate digit in square.</string>
+    <string name="duplicate_in_column">Duplicate digit in column.</string>
+    <string name="duplicate_in_row">Duplicate digit in row.</string>
 </resources>
