@@ -4,7 +4,7 @@
     <string name="unsolvable">Sudoku is niet oplosbaar</string>
     <string name="camera_permission_is_required">Toestemming voor camera-gebruik nodig</string>
     <string name="no_board">Geen Sudoku gevonden, probeer het nog eens.</string>
-    <string name="multiple_solutions">There are multiple solutions.</string>
+    <string name="multiple_solutions">Meerdere oplossingen mogelijk.</string>
     <string name="duplicate_in_square">Cijfer komt meer dan eens voor in vierkant.</string>
     <string name="duplicate_in_column">Cijfer komt meer dan eens voor in kolom.</string>
     <string name="duplicate_in_row">Cijfer komt meer dan eens voor in rij.</string>

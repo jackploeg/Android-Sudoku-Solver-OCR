@@ -14,12 +14,15 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import kotlin.math.floor
 import kotlin.math.min
 
-class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fragment() {
+//class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fragment() {
+class SolveEditFragment() : Fragment() {
 
-    private val sudokuBoard = _sudokuBoard
+    //private val sudokuBoard = _sudokuBoard
+    private val viewModel: SolverViewModel by activityViewModels()
 
     private var EDIT = true
 
@@ -30,83 +33,92 @@ class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fr
         val view = inflater.inflate(R.layout.fragment_solve_edit, container, false)
 
         val sbv = view.findViewById<SudokuBoardView>(R.id.sudokuBoard)
-        sbv.setSudokuBoard(sudokuBoard)
-
-        // TODO alleen done icon tonen als de sudoku oplosbaar is
-        // sowieso > 16 cijfers voorgevuld
-
-        (activity as SolverActivity).findViewById<Button>(R.id.editBtn)
-            .setBackgroundResource(R.drawable.baseline_done_24)
-
-        (activity as SolverActivity).bindListenerToView<Button>(R.id.editBtn) { button ->
-            EDIT = !EDIT
-            if (EDIT) {
-                sbv.isEditingMode(true)
-
-                SudokuUtils.set0(sudokuBoard)
+//        sbv.setSudokuBoard(sudokuBoard)
+        viewModel.sudokuBoard.let { sudokuboarddata ->
+            sudokuboarddata.value?.let { sudokuBoard ->
                 sbv.setSudokuBoard(sudokuBoard)
 
-                button.setBackgroundResource(R.drawable.baseline_done_24)
-            } else {
-                runCatching {
-                    Solver.getInstance().checkStartGridValidity(sudokuBoard)
-                    sbv.isEditingMode(false)
+                // TODO alleen done icon tonen als de sudoku oplosbaar is
+                // sowieso > 16 cijfers voorgevuld
 
-                    SudokuUtils.set0(sudokuBoard)
-                    Solver.getInstance().solveSudoku(sudokuBoard)
-                    sbv.setSudokuBoard(sudokuBoard)
+                (activity as SolverActivity).findViewById<Button>(R.id.editBtn)
+                    .setBackgroundResource(R.drawable.baseline_done_24)
 
-                    button.setBackgroundResource(R.drawable.baseline_edit_24)
+                (activity as SolverActivity).bindListenerToView<Button>(R.id.editBtn) { button ->
+                    EDIT = !EDIT
+                    if (EDIT) {
+                        sbv.isEditingMode(true)
 
-                    (activity as SolverActivity).changeActiveFragment(
-                        SolveImageFragment(
-                            "tmpBitmap",
-                            sudokuBoard
-                        )
-                    )
-                }.recover {
-                    // {
-                    Toast.makeText(
-                        context,
-                        it.message,
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
+                        SudokuUtils.set0(sudokuBoard)
+                        sbv.setSudokuBoard(sudokuBoard)
 
+                        button.setBackgroundResource(R.drawable.baseline_done_24)
+                    } else {
+                        runCatching {
+//                            Solver.getInstance().checkStartGridValidity(sudokuBoard)
+                            sbv.isEditingMode(false)
 
-        // Add listeners to all 1..9 buttons
-        for (i in 1..9) {
-            val id =
-                resources.getIdentifier("b${i}", "id", (activity as SolverActivity).packageName)
-            view.findViewById<Button>(id).setOnClickListener {
-                if (sbv.SELECTED_ROW != -1 && sbv.SELECTED_COLUMN != -1) {
-                    sudokuBoard[sbv.SELECTED_ROW][sbv.SELECTED_COLUMN].let {
-                        it.number = i
-                        it.type = SudokuUtils.SUDOKU_CELL_TYPE_GIVEN
+//                            SudokuUtils.set0(sudokuBoard)
+                            //Solver.getInstance().solveSudoku(sudokuBoard)
+                            sbv.setSudokuBoard(sudokuBoard)
+
+                            button.setBackgroundResource(R.drawable.baseline_edit_24)
+
+                            (activity as SolverActivity).changeActiveFragment(
+                                SolveImageFragment(
+                                    "tmpBitmap",
+                                    viewModel
+                                )
+                            )
+                        }.recover {
+                            // {
+                            Toast.makeText(
+                                context,
+                                it.message,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
-                    sbv.setSudokuBoard(sudokuBoard)
+                }
 
-                    sbv.SELECTED_COLUMN = -1
-                    sbv.SELECTED_ROW = -1
+
+                // Add listeners to all 1..9 buttons
+                for (i in 1..9) {
+                    val id =
+                        resources.getIdentifier(
+                            "b${i}",
+                            "id",
+                            (activity as SolverActivity).packageName
+                        )
+                    view.findViewById<Button>(id).setOnClickListener {
+                        if (sbv.SELECTED_ROW != -1 && sbv.SELECTED_COLUMN != -1) {
+                            sudokuBoard[sbv.SELECTED_ROW][sbv.SELECTED_COLUMN].let {
+                                it.number = i
+                                it.type = SudokuUtils.SUDOKU_CELL_TYPE_GIVEN
+                            }
+                            sbv.setSudokuBoard(sudokuBoard)
+                            //(activity as SolverActivity).solveSudoku()
+                            viewModel.startSolver()
+                            sbv.SELECTED_COLUMN = -1
+                            sbv.SELECTED_ROW = -1
+                        }
+                    }
+                }
+
+                view.findViewById<Button>(R.id.bX).setOnClickListener {
+                    if (sbv.SELECTED_ROW != -1 && sbv.SELECTED_COLUMN != -1) {
+                        sudokuBoard[sbv.SELECTED_ROW][sbv.SELECTED_COLUMN].let {
+                            it.number = 0
+                            it.type = SudokuUtils.SUDOKU_CELL_TYPE_SOLUTION
+                        }
+                        sbv.setSudokuBoard(sudokuBoard)
+
+                        sbv.SELECTED_COLUMN = -1
+                        sbv.SELECTED_ROW = -1
+                    }
                 }
             }
         }
-
-        view.findViewById<Button>(R.id.bX).setOnClickListener {
-            if (sbv.SELECTED_ROW != -1 && sbv.SELECTED_COLUMN != -1) {
-                sudokuBoard[sbv.SELECTED_ROW][sbv.SELECTED_COLUMN].let {
-                    it.number = 0
-                    it.type = SudokuUtils.SUDOKU_CELL_TYPE_SOLUTION
-                }
-                sbv.setSudokuBoard(sudokuBoard)
-
-                sbv.SELECTED_COLUMN = -1
-                sbv.SELECTED_ROW = -1
-            }
-        }
-
         return view
     }
 

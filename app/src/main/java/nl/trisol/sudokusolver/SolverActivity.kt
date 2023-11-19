@@ -5,27 +5,27 @@ import android.os.Bundle
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import nl.trisol.sudokusolver.R
 
 class SolverActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "SudokuSolver"
-
-        private const val STATE_IMAGE = 0
-        private const val STATE_EDIT = 1
     }
 
-    private lateinit var sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>
+    private lateinit var viewModel: SolverViewModel
 
-    private var STATE = STATE_EDIT
-    private var solvable = false
+    private lateinit var sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_solve)
+        setupViewModel()
+        setupSolverWatcher()
 
         if (intent.hasExtra("sudokuBoard")) {
             sudokuBoard =
@@ -34,14 +34,16 @@ class SolverActivity : AppCompatActivity() {
                 else
                     intent.getSerializableExtra("sudokuBoard") as Array<Array<SudokuUtils.SudokuCell>>
 
-            solvable = Solver.getInstance().solveSudoku(sudokuBoard)
-            changeActiveFragment(SolveEditFragment(sudokuBoard))
+            //solvable = Solver.getInstance().solveSudoku(sudokuBoard)
+
+            viewModel.setSudokuBoard(sudokuBoard)
+            changeActiveFragment(SolveEditFragment())
             findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_done_24)
 
         } else {
             sudokuBoard = SudokuUtils.emptySudoku2DArray()
-
-            changeActiveFragment(SolveEditFragment(sudokuBoard))
+            viewModel.setSudokuBoard(sudokuBoard)
+            changeActiveFragment(SolveEditFragment())
             findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_done_24)
         }
 
@@ -51,21 +53,6 @@ class SolverActivity : AppCompatActivity() {
             finish()
         }
 
-//        findViewById<Button>(R.id.editBtn).setOnClickListener {
-//            if(STATE == STATE_IMAGE) {
-//                STATE = STATE_EDIT
-//
-//                SudokuUtils.set0(sudokuBoard)
-//                changeActiveFragment(SolveEditFragment(sudokuBoard))
-//
-//                findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_done_24)
-//            } else {
-//                STATE = STATE_IMAGE
-//                changeActiveFragment(SolveImageFragment("tmpBitmap", sudokuBoard))
-//                findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_edit_24)
-//
-//            }
-//        }
     }
 
     /**
@@ -80,4 +67,39 @@ class SolverActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment)
             .commit()
     }
+
+    fun solveSudoku() {
+        viewModel.startSolver()
+    }
+
+    private fun setupSolverWatcher() {
+        viewModel.uiState.observe(this) {
+            when (it) {
+                is UiState.Success -> {
+//                    progressBar.visibility = View.GONE
+//                    textView.text = it.data
+//                    textView.visibility = View.VISIBLE
+                    Toast.makeText(this, "Succes!",Toast.LENGTH_LONG).show()
+                }
+                is UiState.Loading -> {
+//                    progressBar.visibility = View.VISIBLE
+//                    textView.visibility = View.GONE
+                }
+                is UiState.Error -> {
+                    //Handle Error
+//                    progressBar.visibility = View.GONE
+//                    Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+//        viewModel.startSolver()
+    }
+
+    private fun setupViewModel() {
+        viewModel = ViewModelProvider(
+            this,
+            ViewModelFactory()
+        )[SolverViewModel::class.java]
+    }
+
 }

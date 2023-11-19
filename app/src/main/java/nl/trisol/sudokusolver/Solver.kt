@@ -14,6 +14,7 @@ class Solver(_context: Context) {
 
         private lateinit var instance: Solver
         private const val TAG = "Solver"
+        private const val MIN_NUMBERS = 17
 
         fun init(_context: Context) {
             instance = Solver(_context)
@@ -63,7 +64,29 @@ class Solver(_context: Context) {
         return true
     }
 
-    fun checkStartGridValidity(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>): Result<Boolean> {
+    fun checkStartGridValidity(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>): Result<Boolean> =
+        checkAtLeast17Numbers(_sudokuBoard)
+            .onSuccess { checkForDuplicates(_sudokuBoard)
+                .onSuccess { checkForMultipleSolutions() }
+            }
+
+
+    fun checkAtLeast17Numbers(sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Result<Boolean> {
+        var numbers = 0
+        for (row in 0 .. 8) {
+            for (col in 0..8) {
+                if (sudokuBoard[row][col].number > 0) {
+                    numbers++
+                }
+            }
+        }
+        if (numbers >= MIN_NUMBERS) {
+            return Result.success(true)
+        }
+        return error(R.string.multiple_solutions)
+    }
+
+    fun checkForDuplicates(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>): Result<Boolean> {
         sudokuBoard = _sudokuBoard
         for (row in 0 .. 8) {
             for (col in 0..8) {
@@ -90,11 +113,10 @@ class Solver(_context: Context) {
                 }
             }
         }
-
-        return singleSolution()
+        return Result.success(true)
     }
 
-    private fun singleSolution(): Result<Boolean> {
+    private fun checkForMultipleSolutions(): Result<Boolean> {
         SudokuUtils.set0(sudokuBoard)
         if (solveFromLowToHigh()) {
             val sbUp = StringBuilder()

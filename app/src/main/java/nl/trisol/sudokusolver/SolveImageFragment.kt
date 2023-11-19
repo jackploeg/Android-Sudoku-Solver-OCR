@@ -14,10 +14,11 @@ import nl.trisol.sudokusolver.R
 import nl.trisol.sudokusolver.imageproc.OpenCV
 import org.opencv.core.Mat
 
-class SolveImageFragment(_fileName: String, _sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fragment() {
+//class SolveImageFragment(_fileName: String, _sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fragment() {
+class SolveImageFragment(val fileName: String, val viewModel: SolverViewModel) : Fragment() {
 
-    private val fileName = _fileName
-    private val sudokuBoard = _sudokuBoard
+    //private val fileName = _fileName
+    //private val sudokuBoard = _sudokuBoard
     private var EDIT = false
 
 
@@ -43,20 +44,25 @@ class SolveImageFragment(_fileName: String, _sudokuBoard: Array<Array<SudokuUtil
         } else {
             mat = SudokuUtils.bitmapToMat(bitmap)
         }
-        OpenCV.overlaySolutionOnImage(mat, sudokuBoard)
+        viewModel.sudokuBoard.let { sudokuboarddata ->
+            sudokuboarddata.value?.let { sudokuBoard ->
+                OpenCV.overlaySolutionOnImage(mat, sudokuBoard)
 
-        bitmap = SudokuUtils.matToBitmap(mat)
+                bitmap = SudokuUtils.matToBitmap(mat)
 
-        view.findViewById<ImageView>(R.id.image_view).setImageBitmap(bitmap)
+                view.findViewById<ImageView>(R.id.image_view).setImageBitmap(bitmap)
 
-        (activity as SolverActivity).findViewById<Button>(R.id.editBtn).setBackgroundResource(R.drawable.baseline_edit_24)
-        (activity as SolverActivity).bindListenerToView<Button>(R.id.editBtn) {
-            //EDIT = !EDIT
-            //if(EDIT) {
-                (activity as SolverActivity).changeActiveFragment(SolveEditFragment(sudokuBoard))
-            //}
+                (activity as SolverActivity).findViewById<Button>(R.id.editBtn)
+                    .setBackgroundResource(R.drawable.baseline_edit_24)
+                (activity as SolverActivity).bindListenerToView<Button>(R.id.editBtn) {
+                    //EDIT = !EDIT
+                    //if(EDIT) {
+                    (activity as SolverActivity).changeActiveFragment(SolveEditFragment())
+                    //}
+                }
+
+            }
         }
-
         return view
     }
 }
