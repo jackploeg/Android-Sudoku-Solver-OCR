@@ -65,8 +65,8 @@ class Solver(_context: Context) {
     }
 
     fun checkStartGridValidity(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>): Result<Boolean> =
-        checkAtLeast17Numbers(_sudokuBoard)
-            .onSuccess { checkForDuplicates(_sudokuBoard)
+        checkForDuplicates(_sudokuBoard)
+            .onSuccess {checkAtLeast17Numbers(_sudokuBoard)
                 .onSuccess { checkForMultipleSolutions() }
             }
 
@@ -83,7 +83,7 @@ class Solver(_context: Context) {
         if (numbers >= MIN_NUMBERS) {
             return Result.success(true)
         }
-        return error(R.string.multiple_solutions)
+        return error(context.getString(R.string.not_enough_digits))
     }
 
     fun checkForDuplicates(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>): Result<Boolean> {
@@ -94,10 +94,16 @@ class Solver(_context: Context) {
                 if (entry > 0) {
                     // Check on row and column
                     for (i in 0 until 9) {
-                        if (i != col && sudokuBoard[row][i].number == entry)
+                        if (i != col && sudokuBoard[row][i].number == entry) {
+                            sudokuBoard[row][col].type = SudokuUtils.SUDOKU_CELL_TYPE_ERROR
+                            sudokuBoard[row][i].type = SudokuUtils.SUDOKU_CELL_TYPE_ERROR
                             return error(context.getString(R.string.duplicate_in_row))
-                        if (i != row && sudokuBoard[i][col].number == entry)
+                        }
+                        if (i != row && sudokuBoard[i][col].number == entry) {
+                            sudokuBoard[row][col].type = SudokuUtils.SUDOKU_CELL_TYPE_ERROR
+                            sudokuBoard[i][col].type = SudokuUtils.SUDOKU_CELL_TYPE_ERROR
                             return error(context.getString(R.string.duplicate_in_column))
+                        }
                     }
 
                     // Check in the 3x3 subgrid
@@ -106,10 +112,14 @@ class Solver(_context: Context) {
                     val subgridTlj = col / 3
                     for (i in subgridTLi * 3 until subgridTLi * 3 + 3) {
                         for (j in subgridTlj * 3 until subgridTlj * 3 + 3) {
-                            if (sudokuBoard[i][j].number == entry && i != row && j != col)
+                            if (sudokuBoard[i][j].number == entry && i != row && j != col) {
+                                sudokuBoard[row][col].type = SudokuUtils.SUDOKU_CELL_TYPE_ERROR
+                                sudokuBoard[i][j].type = SudokuUtils.SUDOKU_CELL_TYPE_ERROR
                                 return error(context.getString(R.string.duplicate_in_square))
+                            }
                         }
                     }
+                    sudokuBoard[row][col].type = SudokuUtils.SUDOKU_CELL_TYPE_GIVEN
                 }
             }
         }
@@ -137,7 +147,7 @@ class Solver(_context: Context) {
                 return error(context.getString(R.string.multiple_solutions))
             }
         }
-        return error(context.getString(R.string.multiple_solutions))
+        return error(context.getString(R.string.unsolvable))
     }
 
     /**

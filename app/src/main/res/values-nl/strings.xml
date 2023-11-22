@@ -8,4 +8,5 @@
     <string name="duplicate_in_square">Cijfer komt meer dan eens voor in vierkant.</string>
     <string name="duplicate_in_column">Cijfer komt meer dan eens voor in kolom.</string>
     <string name="duplicate_in_row">Cijfer komt meer dan eens voor in rij.</string>
+    <string name="not_enough_digits">Niet genoeg getallen.</string>
 </resources>

@@ -12,6 +12,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -21,7 +22,6 @@ import kotlin.math.min
 //class SolveEditFragment(_sudokuBoard: Array<Array<SudokuUtils.SudokuCell>>) : Fragment() {
 class SolveEditFragment() : Fragment() {
 
-    //private val sudokuBoard = _sudokuBoard
     private val viewModel: SolverViewModel by activityViewModels()
 
     private var EDIT = true
@@ -33,13 +33,29 @@ class SolveEditFragment() : Fragment() {
         val view = inflater.inflate(R.layout.fragment_solve_edit, container, false)
 
         val sbv = view.findViewById<SudokuBoardView>(R.id.sudokuBoard)
-//        sbv.setSudokuBoard(sudokuBoard)
+        viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
+            val solverActivity = (activity as SolverActivity)
+            when (uiState) {
+                is UiState.Loading -> {
+                    solverActivity.hideDoneButton()
+                    solverActivity.setStatus("Oplossen...")
+                }
+
+                is UiState.Success -> {
+                    solverActivity.showDoneButton()
+                    solverActivity.setStatus("Opgelost!")
+                }
+
+                is UiState.Error -> {
+                    solverActivity.hideDoneButton()
+                    solverActivity.setStatus(uiState.message)
+                }
+            }
+        }
+
         viewModel.sudokuBoard.let { sudokuboarddata ->
             sudokuboarddata.value?.let { sudokuBoard ->
                 sbv.setSudokuBoard(sudokuBoard)
-
-                // TODO alleen done icon tonen als de sudoku oplosbaar is
-                // sowieso > 16 cijfers voorgevuld
 
                 (activity as SolverActivity).findViewById<Button>(R.id.editBtn)
                     .setBackgroundResource(R.drawable.baseline_done_24)
@@ -112,7 +128,7 @@ class SolveEditFragment() : Fragment() {
                             it.type = SudokuUtils.SUDOKU_CELL_TYPE_SOLUTION
                         }
                         sbv.setSudokuBoard(sudokuBoard)
-
+                        viewModel.startSolver()
                         sbv.SELECTED_COLUMN = -1
                         sbv.SELECTED_ROW = -1
                     }
@@ -126,12 +142,14 @@ class SolveEditFragment() : Fragment() {
         View(context, attributeSet) {
 
         private val boardPaint = Paint()
+        private val errPaint = Paint()
         private val textPaint = Paint()
 
         private val characterPaintRect = Rect()
 
         private var thickColor: Int = 0
         private var thinColor: Int = 0
+        private var errColor: Int = 0
 
         private var cellsize: Float = 0.0F
 
@@ -153,6 +171,7 @@ class SolveEditFragment() : Fragment() {
             try {
                 thinColor = attrs.getInteger(R.styleable.SudokuBoardView_thinColor, 0)
                 thickColor = attrs.getInteger(R.styleable.SudokuBoardView_thickColor, 0)
+                errColor = attrs.getInteger(R.styleable.SudokuBoardView_errColor, 0)
             } finally {
                 attrs.recycle()
             }
@@ -216,8 +235,20 @@ class SolveEditFragment() : Fragment() {
             boardPaint.color = thinColor
             for (i in 1..8) {
                 if (i % 3 != 0) {
-                    canvas.drawLine(cellsize * i, 0.0F, cellsize * i, width.toFloat(), boardPaint)
-                    canvas.drawLine(0.0F, cellsize * i, width.toFloat(), cellsize * i, boardPaint)
+                    canvas.drawLine(
+                        cellsize * i,
+                        0.0F,
+                        cellsize * i,
+                        width.toFloat(),
+                        boardPaint
+                    )
+                    canvas.drawLine(
+                        0.0F,
+                        cellsize * i,
+                        width.toFloat(),
+                        cellsize * i,
+                        boardPaint
+                    )
                 }
             }
 
@@ -227,13 +258,20 @@ class SolveEditFragment() : Fragment() {
             for (i in 1..8) {
                 if (i % 3 == 0) {
                     canvas.drawLine(cellsize * i, 0F, cellsize * i, width.toFloat(), boardPaint)
-                    canvas.drawLine(0F, cellsize * i, height.toFloat(), cellsize * i, boardPaint)
+                    canvas.drawLine(
+                        0F,
+                        cellsize * i,
+                        height.toFloat(),
+                        cellsize * i,
+                        boardPaint
+                    )
                 }
             }
         }
 
         private fun drawNumbers(canvas: Canvas) {
             boardPaint.color = thinColor
+            errPaint.color = errColor
             textPaint.textSize = 60.0F
 
             // TODO checken of de sudoku oplosbaar is, zo niet: geem done icon tonen
@@ -251,6 +289,15 @@ class SolveEditFragment() : Fragment() {
                                 i * cellsize + cellsize / 2,
                                 50F,
                                 boardPaint
+                            )
+                        }
+                        if (sudokuBoard[i][j].type == SudokuUtils.SUDOKU_CELL_TYPE_ERROR && (j != SELECTED_COLUMN || i != SELECTED_ROW)) {
+                            filledCellsCount++
+                            canvas.drawCircle(
+                                j * cellsize + cellsize / 2,
+                                i * cellsize + cellsize / 2,
+                                50F,
+                                errPaint
                             )
                         }
 

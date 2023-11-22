@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="thin">#5e5e5e</color>
     <color name="thick">#b44f00</color>
+    <color name="err">#ff4f00</color>
 </resources>

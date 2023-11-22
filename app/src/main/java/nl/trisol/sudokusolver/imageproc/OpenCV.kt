@@ -170,6 +170,7 @@ object OpenCV {
                     2.0,
                     when (solution[i][j].type) {
                         SudokuUtils.SUDOKU_CELL_TYPE_GIVEN -> Scalar(255.0, 32.0, 32.0, 255.0)
+                        SudokuUtils.SUDOKU_CELL_TYPE_ERROR -> Scalar(255.0, 255.0, 32.0, 255.0)
                         SudokuUtils.SUDOKU_CELL_TYPE_SOLUTION -> Scalar(32.0, 255.0, 32.0, 255.0)
                         else -> Scalar(20.0, 32.0, 20.0, 128.0)
                     },

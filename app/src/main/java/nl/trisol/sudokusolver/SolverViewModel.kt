@@ -1,5 +1,6 @@
 package nl.trisol.sudokusolver
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,10 @@ class SolverViewModel : ViewModel() {
 
     private val _sudokuBoard = MutableLiveData<Array<Array<SudokuUtils.SudokuCell>>>()
     val sudokuBoard: LiveData<Array<Array<SudokuUtils.SudokuCell>>> = _sudokuBoard
+
+    companion object {
+        val TAG = "SolverViewModel"
+    }
 
     init {
         _sudokuBoard.value = SudokuUtils.emptySudoku2DArray()
@@ -37,9 +42,9 @@ class SolverViewModel : ViewModel() {
             try {
                 // do a long running task
                 doSolve()
-                _uiState.postValue(UiState.Success("Task Completed"))
+                _uiState.postValue(UiState.Success("OK"))
             } catch (e: Exception) {
-                _uiState.postValue(UiState.Error("Something Went Wrong"))
+                _uiState.postValue(e.message?.let { UiState.Error(it) })
             }
         }
     }
@@ -56,13 +61,13 @@ class SolverViewModel : ViewModel() {
         withContext(Dispatchers.Default) {
             // your code for doing a long running task
             _sudokuBoard.value?.let {
+                Log.d(TAG, "doSolve: ")
                 SudokuUtils.set0(it)
-                Solver.getInstance().checkStartGridValidity(it)
-                Solver.getInstance().solveSudoku(it)
-                SudokuUtils.set0(it)
+                if (!Solver.getInstance().checkStartGridValidity(it).isSuccess){
+                //if (!Solver.getInstance().solveSudoku(it)) {
+                    SudokuUtils.set0(it)
+                }
             }
-            // Added delay to simulate
-            //delay(5000)
         }
     }
 }

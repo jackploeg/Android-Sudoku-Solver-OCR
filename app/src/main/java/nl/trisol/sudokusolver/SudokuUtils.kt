@@ -10,6 +10,7 @@ object SudokuUtils {
 
     const val SUDOKU_CELL_TYPE_GIVEN = 0
     const val SUDOKU_CELL_TYPE_SOLUTION = 1
+    const val SUDOKU_CELL_TYPE_ERROR = 2
 
     data class SudokuCell(var number: Int, var type: Int) : Serializable
 
